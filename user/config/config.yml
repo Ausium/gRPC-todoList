@@ -1,0 +1,22 @@
+server:
+  domain: user
+  version: 1.0
+  jwtSecret: FanOne
+  grpcAddress: "127.0.0.1:10001"
+
+mysql:
+  driverName: mysql
+  host: 114.132.235.105
+  port: 33306
+  database: grpc_todolist
+  username: root
+  password: 123456
+  charset: utf8mb4
+
+redis:
+  user_name: default
+  address: 127.0.0.1:6379
+  password:
+
+etcd:
+  address: 127.0.0.1:2379
