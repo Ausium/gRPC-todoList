@@ -4,10 +4,12 @@ import (
 	"context"
 	"user/internal/repository"
 	"user/internal/service"
+	pb "user/internal/service"
 	"user/pkg/e"
 )
 
 type UserService struct {
+	pb.UnimplementedUserServiceServer
 }
 
 func NewUserService() *UserService {

@@ -36,7 +36,7 @@ func NewRegister(etcdAddrs []string, logger *logrus.Logger) *Register {
 	}
 }
 
-// 初始化自己的Register
+// Register a service
 func (r *Register) Register(srvInfo Server, ttl int64) (chan<- struct{}, error) {
 	var err error
 
@@ -44,7 +44,6 @@ func (r *Register) Register(srvInfo Server, ttl int64) (chan<- struct{}, error) 
 		return nil, errors.New("invalid ip address")
 	}
 
-	//初始化
 	if r.cli, err = clientv3.New(clientv3.Config{
 		Endpoints:   r.EtcdAddrs,
 		DialTimeout: time.Duration(r.DialTimeout) * time.Second,
@@ -66,20 +65,17 @@ func (r *Register) Register(srvInfo Server, ttl int64) (chan<- struct{}, error) 
 	return r.closeCh, nil
 }
 
-// 创建etcd自带的那些实例
 func (r *Register) register() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(r.DialTimeout)*time.Second)
 	defer cancel()
-	//申请一个租约
+
 	leaseResp, err := r.cli.Grant(ctx, r.srvTTL)
 	if err != nil {
 		return err
 	}
 
-	//赋予租约
 	r.leasesID = leaseResp.ID
 
-	//保证节点的存活性
 	if r.keepAliveCh, err = r.cli.KeepAlive(context.Background(), r.leasesID); err != nil {
 		return err
 	}
@@ -89,7 +85,6 @@ func (r *Register) register() error {
 		return err
 	}
 
-	//把服务push到服务注册中
 	_, err = r.cli.Put(context.Background(), BuildRegisterPath(r.srvInfo), string(data), clientv3.WithLease(r.leasesID))
 
 	return err
@@ -106,7 +101,6 @@ func (r *Register) unregister() error {
 	return err
 }
 
-// 保证节点是高可活的，高可靠的
 func (r *Register) keepAlive() {
 	ticker := time.NewTicker(time.Duration(r.srvTTL) * time.Second)
 
@@ -126,7 +120,6 @@ func (r *Register) keepAlive() {
 					r.logger.Error("register failed, error: ", err)
 				}
 			}
-			//超时器
 		case <-ticker.C:
 			if r.keepAliveCh == nil {
 				if err := r.register(); err != nil {

@@ -19,7 +19,6 @@ message UserDetailResponse{
   uint32 Code=2;
 }
 
-
 service UserService{
   rpc UserLogin(UserRequest) returns(UserDetailResponse);
   rpc UserRegister(UserRequest) returns(UserDetailResponse);
